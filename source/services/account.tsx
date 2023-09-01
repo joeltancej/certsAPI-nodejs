@@ -8,7 +8,7 @@ export const getAccount = async () => {
   and there are many ways to connect, such as over HTTP, WebSockets or injected providers such as MetaMask. 
   */
   const polygonProvider = new providers.InfuraProvider("matic", "<INFURA_API_KEY>")
-  const signerFromPrivateKey = new Wallet("0x11cd7250b5b4af51bd9fad57e0e1d5d55f3b0abae454b6104b2da5562030f2a3", polygonProvider);
+  const signerFromPrivateKey = new Wallet("<WALLET_PRIVATE_KEY>", polygonProvider);
 
   // returns a Signer, an abstraction of an Ethereum account that can be used to sign transactions
   return {
