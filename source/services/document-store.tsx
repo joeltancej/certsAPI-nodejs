@@ -1,7 +1,7 @@
 // JsonRpcSigner class represents a signer that can be used to sign Ethereum transactions
 import { JsonRpcSigner } from "@ethersproject/providers";
 // DocumentStoreFactory class is a factory that can be used to deploy document stores on the Ethereum blockchain
-import { DocumentStoreFactory } from "@govtechsg/document-store";
+import { DocumentStoreFactory, connect } from "@govtechsg/document-store";
 import { WrappedDocument } from "@govtechsg/open-attestation/dist/types/2.0/types";
 import { Wallet } from "ethers"
 
@@ -18,6 +18,33 @@ export const deployDocumentStore = async (signer: JsonRpcSigner) => {
     await documentStore.deployTransaction.wait();
     // returns the address of the deployed document store
     return documentStore.address;
+};
+
+export const issueMerkleRoot = async ({
+  /*
+  wrappedDocument: The wrapped document that needs to be issued.
+  documentStoreAddress: The address of the document store.
+  signer: The signer that will be used to sign the issuance transaction.
+  */
+  wrappedDocument,
+  documentStoreAddress,
+  signer,
+}: {
+  wrappedDocument: WrappedDocument;
+  documentStoreAddress: string;
+  signer: Wallet;
+}) => {
+  const documentStore = connect(documentStoreAddress, signer);
+
+  const {
+    signature: { targetHash },
+  } = wrappedDocument;
+  const tx = (await documentStore).issue(`0x${targetHash}`);
+  const receipt = (await tx).wait();
+  console.log(receipt);
+
+  const isIssued = (await documentStore).isIssued(`0x${targetHash}`);
+  console.log(isIssued);
 };
 
 export const issueDocument = async ({
