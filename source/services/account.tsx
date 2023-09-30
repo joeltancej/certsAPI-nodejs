@@ -13,7 +13,7 @@ export const getAccount = async () => {
   send transactions to update the state.It is one of the most fundamental components of interacting with a blockchain application, 
   and there are many ways to connect, such as over HTTP, WebSockets or injected providers such as MetaMask. 
   */
-  const polygonProvider = new providers.InfuraProvider("matic", "2b0c68d49b2245a7b7a1f7dfb1fe65bb")
+  const polygonProvider = new providers.InfuraProvider("matic", infuraKey)
   const signerFromPrivateKey = new Wallet(privateWalletKey, polygonProvider);
 
   // Returns a Signer, an abstraction of an Ethereum account that can be used to sign transactions
