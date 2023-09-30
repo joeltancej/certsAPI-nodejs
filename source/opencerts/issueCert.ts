@@ -1,80 +1,138 @@
 import { getAccount } from "../services/account";
-import { issueDocument, issueMerkleRoot } from "../services/document-store";
-// import { documentBase } from "../services/document-base";
+import { issueDocument } from "../services/document-store";
 import { wrapDocument } from "@govtechsg/open-attestation";
-// import { useAccountContext } from "../contexts/AccountContext";
+import { signDocument, SUPPORTED_SIGNING_ALGORITHM } from "@govtechsg/open-attestation";
 
-// const { signer, setSigner, setNetwork } = useAccountContext();
-// polygon
-const documentStoreAddress  = "0x63d690147B6374FC731C4eB1AD215E6483A9a41A";
+// documentStoreAddress: Document store address tied to and deployed using Polygon wallet.
+const documentStoreAddress = `${process.env.DOCUMENT_STORE_ADDRESS}`;
+// publicWalletAddress: Public address of the Polygon wallet.
+const publicWalletAddress = `${process.env.PUBLIC_WALLET_ADDRESS}`;
+// privateWalletKey: Private key of the Polygon wallet.
+const privateWalletKey = `${process.env.PRIVATE_WALLET_KEY}`;
 
-const documentBase = 
+// Test function to test wrappedDocument output.
+// export const testFunction = async() => {
+//     const rawDocument = {...documentBase};
+//     const wrappedDocument = await wrapDocument(rawDocument as any);
+//     return wrappedDocument;
+// }
+
+export const issue = async (
+  /*
+    issue - Issues blockchain certificate.
+
+    Arguments:
+        courseName (string): Name of the course.
+        certNo (string): ID of the certification (e.g., L9F3A02).
+        learnerName (string): Name of the learner.
+        orgName (string): Name of the organisation.
+        validYears (string): Number of years for which certificate should be valid.
+
+    Returns:
+        wrappedDocument: Copy of wrapped document that has been issued.
+  */
+  {
+  courseName,
+  certNo,
+  learnerName,
+  orgName,
+  validYears
+}:{
+  courseName:string;
+  certNo:string;
+  learnerName:string;
+  orgName:string;
+  validYears:number;
+}) => {
+  // now: Current date of creation
+  const now: Date = new Date()
+  // created: Date of creation in ISO format.
+  const created: string = now.toISOString()
+  
+  const curSplit: string[] = (now.toString().split('(')[0]).split(' ')
+  // curDate: Formatted date of issuance (e.g., 30 September 2023).
+  const curDate: string = curSplit[1] + " " + curSplit[2] + " " + curSplit[3]
+
+  // Adds days to date to get date of expiry.
+  now.setDate(now.getDate() + validYears*365);
+  const expSplit: string[] = (now.toString().split('(')[0]).split(' ')
+  // expDate: Formatted date of expiry (e.g., 30 September 2023).
+  const expDate: string = expSplit[1] + " " + expSplit[2] + " " + expSplit[3]
+  
+  // documentBase: Document base to be wrapped.
+  const documentBase = 
+  {
+    "id": "53b75bbe",
+    "name": "Childsafeguarding.com Certificate",
+    "description": "Childsafeguarding.com Certificate",
+    "$template": {
+      "name": "GOVTECH_DEMO",
+      "type": "EMBEDDED_RENDERER",
+      "url": "https://demo-renderer.opencerts.io"
+    },
+    "issuers": [
       {
-        "id": "53b75bbe",
-        "name": "Childsafeguarding.com Certificate",
-        "description": "Childsafeguarding.com Certificate",
-        "issuedOn": "2019-05-29T00:00:00+08:00",
-        "expiresOn": "2019-05-29T00:00:00+08:00",
-        "admissionDate": "2017-08-01T00:00:00+08:00",
-        "graduationDate": "2022-08-01T00:00:00+08:00",
-        "$template": {
-          "name": "GOVTECH_DEMO",
-          "type": "EMBEDDED_RENDERER",
-          "url": "https://demo-renderer.opencerts.io"
-        },
-        "issuers": [
-          {
-            "name": "Govtech",
-            "url": "https://tech.gov.sg",
-            "documentStore": documentStoreAddress,
-            "identityProof": {
-              "type": "DNS-TXT",
-              "location": "eth.csawa.re"
-            }
-          }
-        ],
-        "network": {
-
-          "chain": "MATIC",
-    
-          "chainId": "137"
-    
-        },
-        "transcript": [
-          {
-            "name": "Level 1 Course",
-            "grade": "A+",
-            "courseCredit": "3",
-            "courseCode": "CS 1110",
-            "examinationDate": "2017-12-01T00:00:00+08:00",
-            "semester": "1"
-          },
-        ],
-        "additionalData": {
-          "merit": "Y",
-          "studentId": "123456",
-          "transcriptId": "001"
+        "name": "Govtech",
+        "url": "https://tech.gov.sg",
+        "documentStore": documentStoreAddress,
+        "identityProof": {
+          "type": "DNS-TXT",
+          "location": "eth.csawa.re"
         }
       }
+    ],
+    "network": {
+      "chain": "MATIC",
+      "chainId": "137"
+    },
+    "verification":{
+      "type": "SHA3MerkleProof",
+      "created": created,
+      "verificationMethod": "did:key:0xBf36BedbA9D4f518CFe340227c42c7c0031C921C#controller"
+    },
+    "transcript": [
+      {
+        "courseName": courseName,
+        "certNo": certNo,
+        "learnerName": learnerName,
+        "issuedOn": curDate,
+        "validUntil": expDate,
+        "orgName": orgName
+      },
+    ],
+  }
 
-export const onConnect = async () => {
     try {
-        // returns an object that contains the providerSigner property, which is a JsonRpcSigner object
+        // Returns an object that contains the providerSigner property, which is a JsonRpcSigner object.
         const { providerSigner, providerNetwork } = await getAccount();
-        // sets the signer state variable to the providerSigner object
+
+        // rawDocument: Converted raw document from documentBase.
         const rawDocument = {...documentBase}
-        const wrappedDocument = wrapDocument(rawDocument as any)
-        await issueMerkleRoot({
+
+        // wrappedDocument: Wrapped document returned from wrapping rawDocument. 
+        const wrappedDocument = await wrapDocument(rawDocument as any)
+
+        // Signs wrappedDocument using Secp256k1VerificationKey2018 algorithm and wallet keys.
+        await signDocument(wrappedDocument, SUPPORTED_SIGNING_ALGORITHM.Secp256k1VerificationKey2018, {
+          public: "did:ethr:" + publicWalletAddress + "#controller",
+          private: privateWalletKey,
+        });
+        console.log(JSON.stringify(wrappedDocument, null, 2))
+
+        // Issues wrappedDocument to documentStoreAddress using signer.
+        await issueDocument({
             wrappedDocument,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             signer: providerSigner!,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             documentStoreAddress: documentStoreAddress!,
           });
+
+        // Returns wrappedDocument.
         return wrappedDocument
-        // setCurrentStep("certificate");
     } catch (e) {
         console.error(e);
+        // Returns "not done" if error occurs.
         return "not done"
     }
 };
