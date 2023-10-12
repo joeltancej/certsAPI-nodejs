@@ -9,7 +9,7 @@ const issueCert = async (req: Request, res: Response) => {
     issueCert - Handles post request sent to /issue
 
     Arguments:
-        req (Request): Request body.
+        req (Request): Request body and headers.
         res (Response): Response to be returned.
 
     Returns:
@@ -28,16 +28,27 @@ const issueCert = async (req: Request, res: Response) => {
     // orgName: Name of the organisation.
     let orgName: string = req.body.orgName ?? null;
 
-    // validYears: Number of years for which certificate should be valid.
-    let validYears: number = req.body.validYears ?? null;
+    // issueDate: Date of issue of the certificate.
+    let issueDate: string = req.body.issueDate ?? null;
 
-    // Returns Error 400 code with message if validYears is not an integer.
-    if(!Number.isInteger(validYears)){
-        return res.status(400).send("The parameter validYears must be an integer.")
-    }
+    // validUntil: Date till which certificate is valid, and after which the certificate expires.
+    let validUntil: string = req.body.validUntil ?? null;
+
+    // documentStoreAddress: Document store address tied to and deployed using Polygon wallet.
+    let documentStoreAddress: any = req.headers["document-store-address"] ?? null
+
+    // publicWalletAddress: Public address of the Polygon wallet.
+    let publicWalletAddress: any = req.headers["public-wallet-address"] ?? null
+
+    // privateWalletKey: Private key of the Polygon wallet.
+    let privateWalletKey: any = req.headers["private-wallet-key"] ?? null
+
+    // infuraKey: Infura API key.
+    let infuraKey: any = req.headers["infura-key"]
 
     // Issues blockchain certificate with all field in the request body included.
-    let wrappedDocument: any = await issue({courseName, certNo, learnerName, orgName, validYears})
+    let wrappedDocument: any = await issue({courseName, certNo, learnerName, orgName, issueDate, validUntil, 
+                                        documentStoreAddress, publicWalletAddress, privateWalletKey, infuraKey})
     console.log(wrappedDocument)
 
     if(wrappedDocument == "not done"){
@@ -57,7 +68,7 @@ const verifyCert = async (req: Request, res: Response) => {
     verifyCert - Handles post request sent to /verify
 
     Arguments:
-        req (Request): Request body.
+        req (Request): Request body and headers.
         res (Response): Response to be returned.
 
     Returns:
@@ -68,8 +79,11 @@ const verifyCert = async (req: Request, res: Response) => {
     let wrappedDocument: WrappedDocument = req.body ?? null;
     console.log(wrappedDocument)
 
+    // infuraKey: Infura API key.
+    let infuraKey: any = req.headers["infura-key"]
+
     // results: Verification results of wrapped document.
-    let results = await verify({wrappedDocument})
+    let results = await verify({wrappedDocument, infuraKey})
     console.log(results)
 
     // Returns results after verification is complete.

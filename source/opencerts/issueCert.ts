@@ -3,13 +3,6 @@ import { issueDocument } from "../services/document-store";
 import { wrapDocument } from "@govtechsg/open-attestation";
 import { signDocument, SUPPORTED_SIGNING_ALGORITHM } from "@govtechsg/open-attestation";
 
-// documentStoreAddress: Document store address tied to and deployed using Polygon wallet.
-const documentStoreAddress = `${process.env.DOCUMENT_STORE_ADDRESS}`;
-// publicWalletAddress: Public address of the Polygon wallet.
-const publicWalletAddress = `${process.env.PUBLIC_WALLET_ADDRESS}`;
-// privateWalletKey: Private key of the Polygon wallet.
-const privateWalletKey = `${process.env.PRIVATE_WALLET_KEY}`;
-
 // Test function to test wrappedDocument output.
 // export const testFunction = async() => {
 //     const rawDocument = {...documentBase};
@@ -27,6 +20,9 @@ export const issue = async (
         learnerName (string): Name of the learner.
         orgName (string): Name of the organisation.
         validYears (string): Number of years for which certificate should be valid.
+        documentStoreAddress (string): Document store address tied to and deployed using Polygon wallet.
+        publicWalletAddress (string): Public address of the Polygon wallet.
+        privateWalletKey (string): Private key of the Polygon wallet.
 
     Returns:
         wrappedDocument: Copy of wrapped document that has been issued.
@@ -36,28 +32,28 @@ export const issue = async (
   certNo,
   learnerName,
   orgName,
-  validYears
+  issueDate,
+  validUntil,
+  documentStoreAddress,
+  publicWalletAddress,
+  privateWalletKey,
+  infuraKey
 }:{
   courseName:string;
   certNo:string;
   learnerName:string;
   orgName:string;
-  validYears:number;
+  issueDate:string;
+  validUntil:string;
+  documentStoreAddress:string;
+  publicWalletAddress:string;
+  privateWalletKey:string;
+  infuraKey:string;
 }) => {
   // now: Current date of creation
   const now: Date = new Date()
   // created: Date of creation in ISO format.
   const created: string = now.toISOString()
-  
-  const curSplit: string[] = (now.toString().split('(')[0]).split(' ')
-  // curDate: Formatted date of issuance (e.g., 30 September 2023).
-  const curDate: string = curSplit[1] + " " + curSplit[2] + " " + curSplit[3]
-
-  // Adds days to date to get date of expiry.
-  now.setDate(now.getDate() + validYears*365);
-  const expSplit: string[] = (now.toString().split('(')[0]).split(' ')
-  // expDate: Formatted date of expiry (e.g., 30 September 2023).
-  const expDate: string = expSplit[1] + " " + expSplit[2] + " " + expSplit[3]
   
   // documentBase: Document base to be wrapped.
   const documentBase = 
@@ -95,8 +91,8 @@ export const issue = async (
         "courseName": courseName,
         "certNo": certNo,
         "learnerName": learnerName,
-        "issuedOn": curDate,
-        "validUntil": expDate,
+        "issueDate": issueDate,
+        "validUntil": validUntil,
         "orgName": orgName
       },
     ],
@@ -104,7 +100,7 @@ export const issue = async (
 
     try {
         // Returns an object that contains the providerSigner property, which is a JsonRpcSigner object.
-        const { providerSigner, providerNetwork } = await getAccount();
+        const { providerSigner, providerNetwork } = await getAccount({privateWalletKey, infuraKey});
 
         // rawDocument: Converted raw document from documentBase.
         const rawDocument = {...documentBase}
@@ -118,6 +114,8 @@ export const issue = async (
           private: privateWalletKey,
         });
         console.log(JSON.stringify(wrappedDocument, null, 2))
+        
+        console.log("Issuing...")
 
         // Issues wrappedDocument to documentStoreAddress using signer.
         await issueDocument({
@@ -127,6 +125,8 @@ export const issue = async (
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             documentStoreAddress: documentStoreAddress!,
           });
+        
+          console.log("Issued!")
 
         // Returns wrappedDocument.
         return wrappedDocument

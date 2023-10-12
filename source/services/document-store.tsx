@@ -1,5 +1,3 @@
-// JsonRpcSigner class represents a signer that can be used to sign Ethereum transactions
-import { JsonRpcSigner } from "@ethersproject/providers";
 // DocumentStoreFactory class is a factory that can be used to deploy document stores on the Ethereum blockchain
 import { DocumentStoreFactory, connect } from "@govtechsg/document-store";
 import { WrappedDocument } from "@govtechsg/open-attestation/dist/types/2.0/types";

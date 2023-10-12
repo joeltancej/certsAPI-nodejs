@@ -2,22 +2,22 @@ import { isValid, utils, verificationBuilder, openAttestationVerifiers } from "@
 import { getData } from "@govtechsg/open-attestation";
 import { WrappedDocument } from "@govtechsg/open-attestation/dist/types/2.0/types";
 
-// infuraKey: Infura API key.
-const infuraKey = `${process.env.INFURA_API_KEY}`;
-
 export const verify = async({
   /*
     verify - Verifies wrapped document.
 
     Arguments:
-        wrappedDocument: Document to be verified.
+        wrappedDocument (WrappedDocument): Document to be verified.
+        infuraKey (string): Infura API key.
 
     Returns:
         results: Results of the verification process.
   */
-    wrappedDocument
+    wrappedDocument,
+    infuraKey
 }:{
     wrappedDocument: WrappedDocument;
+    infuraKey: string;
 }) => {
     try{
       // providerOptions: Set of options used to generate provider.
