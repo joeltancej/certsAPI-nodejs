@@ -14,10 +14,12 @@ export const verify = async({
         results: Results of the verification process.
   */
     wrappedDocument,
-    infuraKey
+    infuraKey,
+    docJSON
 }:{
     wrappedDocument: WrappedDocument;
     infuraKey: string;
+    docJSON: any;
 }) => {
     try{
       // providerOptions: Set of options used to generate provider.
@@ -56,6 +58,11 @@ export const verify = async({
       // issuer: Name of issuer extracted from document.
       const issuer = (data["issuers"][0]["identityProof"]?.location);
       console.log("Issuer:", issuer);
+
+      console.log(docJSON.data)
+      const verificationType: string = docJSON.data.verification.verificationType.split("string:")[1]
+      const dateCreated: string = docJSON.data.verification.dateCreated.split("string:")[1]
+      const verificationMethod: string = docJSON.data.verification.verificationMethod.split("string:")[1]
       
       // results: Results of the verification process to be returned.
       const results = {
@@ -63,7 +70,10 @@ export const verify = async({
         "notRevoked":notRevoked,
         "validIssuer":validIssuer,
         "verified":verified,
-        "issuer":issuer
+        "issuer":issuer,
+        "verificationType":verificationType,
+        "dateCreated":dateCreated,
+        "verificationMethod":verificationMethod
       }
 
       // Returns results.

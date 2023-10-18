@@ -32,8 +32,7 @@ export const issue = async (
   certNo,
   learnerName,
   orgName,
-  issueDate,
-  validUntil,
+  validYears,
   documentStoreAddress,
   publicWalletAddress,
   privateWalletKey,
@@ -43,8 +42,7 @@ export const issue = async (
   certNo:string;
   learnerName:string;
   orgName:string;
-  issueDate:string;
-  validUntil:string;
+  validYears: number;
   documentStoreAddress:string;
   publicWalletAddress:string;
   privateWalletKey:string;
@@ -54,6 +52,16 @@ export const issue = async (
   const now: Date = new Date()
   // created: Date of creation in ISO format.
   const created: string = now.toISOString()
+  
+  const curSplit: string[] = (now.toString().split('(')[0]).split(' ')
+  // curDate: Formatted date of issuance (e.g., 30 September 2023).
+  const curDate: string = curSplit[1] + " " + curSplit[2] + " " + curSplit[3]
+
+  // Adds days to date to get date of expiry.
+  now.setDate(now.getDate() + validYears*365);
+  const expSplit: string[] = (now.toString().split('(')[0]).split(' ')
+  // expDate: Formatted date of expiry (e.g., 30 September 2023).
+  const expDate: string = expSplit[1] + " " + expSplit[2] + " " + expSplit[3]
   
   // documentBase: Document base to be wrapped.
   const documentBase = 
@@ -82,8 +90,8 @@ export const issue = async (
       "chainId": "137"
     },
     "verification":{
-      "verificationType": "SHA3MerkleProof",
-      "dateCreated": created,
+      "type": "SHA3MerkleProof",
+      "created": created,
       "verificationMethod": "did:key:0xBf36BedbA9D4f518CFe340227c42c7c0031C921C#controller"
     },
     "transcript": [
@@ -91,8 +99,8 @@ export const issue = async (
         "courseName": courseName,
         "certNo": certNo,
         "learnerName": learnerName,
-        "issueDate": issueDate,
-        "validUntil": validUntil,
+        "issuedOn": curDate,
+        "validUntil": expDate,
         "orgName": orgName
       },
     ],

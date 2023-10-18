@@ -76,14 +76,16 @@ const verifyCert = async (req: Request, res: Response) => {
     */
 
     // wrappedDocument: Wrapped document to be verified.
-    let wrappedDocument: WrappedDocument = req.body ?? null;
+    let wrappedDocument: WrappedDocument = req.body.wrappedDocument ?? null;
     console.log(wrappedDocument)
+    
+    let docJSON: { data: any } = wrappedDocument ?? null;
 
     // infuraKey: Infura API key.
     let infuraKey: any = req.headers["infura-key"]
 
     // results: Verification results of wrapped document.
-    let results = await verify({wrappedDocument, infuraKey})
+    let results = await verify({wrappedDocument, infuraKey, docJSON})
     console.log(results)
 
     // Returns results after verification is complete.
