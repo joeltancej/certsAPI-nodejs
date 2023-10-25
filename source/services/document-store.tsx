@@ -1,7 +1,18 @@
 // DocumentStoreFactory class is a factory that can be used to deploy document stores on the Ethereum blockchain
 import { DocumentStoreFactory, connect } from "@govtechsg/document-store";
 import { WrappedDocument } from "@govtechsg/open-attestation/dist/types/2.0/types";
-import { Wallet } from "ethers"
+import { Wallet, BigNumber } from "ethers"
+
+const scaleBigNumber = (wei: BigNumber | null | undefined, multiplier: number, precision = 2): BigNumber => {
+  if (wei === null || typeof wei === "undefined") {
+    throw new Error("Wei not specified");
+  }
+  const padding = Math.pow(10, precision);
+  const newMultiplier = Math.round(padding * multiplier);
+
+  const newWei = wei.mul(newMultiplier).div(padding);
+  return newWei;
+};
 
 export const issueDocument = async ({
     /*
@@ -36,8 +47,14 @@ export const issueDocument = async ({
       signer,
     );
 
+    // Get recommended fee data.
+    const { gasPrice } = await signer.getFeeData()
+    console.log("Recommended Gas Price:", gasPrice?.toNumber())
+    // Put gas price through a multiplier.
+    const scaledPrice = scaleBigNumber(gasPrice, 3)
+    console.log("Scaled Price:", scaledPrice?.toNumber())
     // Receipt: Receipt received after issuing the document to the document store.
-    const receipt = await documentStore.issue(`0x${targetHash}`);
+    const receipt = await documentStore.issue(`0x${targetHash}`, {gasPrice:scaledPrice});
     // Waits for the issuance transaction to be mined.
     await receipt.wait();
   };
