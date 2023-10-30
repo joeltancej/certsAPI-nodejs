@@ -1,4 +1,4 @@
-# Blockchain Certificate Issuer API
+# OpenAttestation Blockchain Certificate Issuer API
 
 ### Description
 This API was developed using OpenCerts technology and Node.js. All code in this project is written in TypeScript.
