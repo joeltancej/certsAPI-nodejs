@@ -30,10 +30,12 @@ export const issueDocument = async ({
     wrappedDocument,
     documentStoreAddress,
     signer,
+    priority
   }: {
     wrappedDocument: WrappedDocument;
     documentStoreAddress: string;
     signer: Wallet;
+    priority: number;
   }) => {
 
     // targetHash: Target hash extracted from the wrapped document.
@@ -51,7 +53,7 @@ export const issueDocument = async ({
     const { gasPrice } = await signer.getFeeData()
     console.log("Recommended Gas Price:", gasPrice?.toNumber())
     // Put gas price through a multiplier.
-    const scaledPrice = scaleBigNumber(gasPrice, 3)
+    const scaledPrice = scaleBigNumber(gasPrice, priority)
     console.log("Scaled Price:", scaledPrice?.toNumber())
     // Receipt: Receipt received after issuing the document to the document store.
     const receipt = await documentStore.issue(`0x${targetHash}`, {gasPrice:scaledPrice});

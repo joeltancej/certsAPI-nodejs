@@ -46,9 +46,12 @@ const issueCert = async (req: Request, res: Response) => {
     // infuraKey: Infura API key.
     let infuraKey: any = req.headers["infura-key"]
 
+    // priority: Value used to multiply the gas price when issuing certificates, increases priority and issuance speed.
+    let priority: any = req.headers["priority"]
+
     // Issues blockchain certificate with all field in the request body included.
     let wrappedDocument: any = await issue({courseName, certNo, learnerName, orgName, issueDate, validUntil, 
-                                        documentStoreAddress, publicWalletAddress, privateWalletKey, infuraKey})
+                                        documentStoreAddress, publicWalletAddress, privateWalletKey, infuraKey, priority})
     console.log(wrappedDocument)
 
     if(wrappedDocument == "not done"){

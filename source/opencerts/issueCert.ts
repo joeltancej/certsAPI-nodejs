@@ -37,7 +37,8 @@ export const issue = async (
   documentStoreAddress,
   publicWalletAddress,
   privateWalletKey,
-  infuraKey
+  infuraKey,
+  priority
 }:{
   courseName:string;
   certNo:string;
@@ -49,6 +50,7 @@ export const issue = async (
   publicWalletAddress:string;
   privateWalletKey:string;
   infuraKey:string;
+  priority:number;
 }) => {
   // now: Current date of creation
   const now: Date = new Date()
@@ -120,10 +122,9 @@ export const issue = async (
         // Issues wrappedDocument to documentStoreAddress using signer.
         await issueDocument({
             wrappedDocument,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             signer: providerSigner!,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             documentStoreAddress: documentStoreAddress!,
+            priority
           });
         
           console.log("Issued!")
