@@ -86,7 +86,7 @@ export const issue = async (
     "verification":{
       "verificationType": "SHA3MerkleProof",
       "dateCreated": created,
-      "verificationMethod": "did:key:0xBf36BedbA9D4f518CFe340227c42c7c0031C921C#controller"
+      // "verificationMethod": "did:key:0x<PUBLIC_WALLET_ADDRESS>#controller"
     },
     "transcript": [
       {

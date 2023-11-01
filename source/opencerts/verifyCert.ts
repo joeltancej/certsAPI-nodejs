@@ -62,7 +62,7 @@ export const verify = async({
       console.log(docJSON.data)
       const verificationType: string = docJSON.data.verification.verificationType.split("string:")[1]
       const dateCreated: string = docJSON.data.verification.dateCreated.split("string:")[1]
-      const verificationMethod: string = docJSON.data.verification.verificationMethod.split("string:")[1]
+      // const verificationMethod: string = docJSON.data.verification.verificationMethod.split("string:")[1]
       
       // results: Results of the verification process to be returned.
       const results = {
@@ -73,7 +73,7 @@ export const verify = async({
         "issuer":issuer,
         "verificationType":verificationType,
         "dateCreated":dateCreated,
-        "verificationMethod":verificationMethod
+        // "verificationMethod":verificationMethod
       }
 
       // Returns results.
