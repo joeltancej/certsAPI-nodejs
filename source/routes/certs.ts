@@ -1,5 +1,5 @@
 import express from 'express';
-import controller from '../controllers/posts';
+import controller from '../controllers/certs';
 
 // Create an Express router
 const router = express.Router();
